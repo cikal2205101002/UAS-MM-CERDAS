@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Large Minecraft House</title>
+    <title>Large Minecraft House with Moving Steve</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-environment-component@1.5.x/dist/aframe-environment-component.min.js"></script>
   </head>
@@ -13,20 +13,17 @@
       fog="type: linear; color: #555; near: 1; far: 50"
     >
       <a-entity position="0 1.6 4">
-        <!-- Lebih dekat -->
         <a-camera
           wasd-controls-enabled="true"
           look-controls="pointerLockEnabled: true"
         ></a-camera>
       </a-entity>
 
-      <!-- Environment -->
       <a-entity
         environment="preset: forest; ground: hills; dressing: trees;"
       ></a-entity>
       <a-sky color="#a0e9ff"></a-sky>
 
-      <!-- Ground -->
       <a-plane
         rotation="-90 0 0"
         width="300"
@@ -50,26 +47,29 @@
           src="bmw_700_minecraft.glb"
           position="1 0.1 5"
           rotation="0 -45 0"
-          scale="0.1.5 0.1.5 0.1.5"
+          scale="0.15 0.15 0.15"
           shadow="cast: true"
         ></a-gltf-model>
 
-        <!-- Tempat Duduk (Bangku) -->
+        <!-- Tempat Duduk -->
         <a-gltf-model
           src="bench_minecraft.glb"
-          position="2.5 0 -5.2"
+          position="2.5 0.2 -5.2"
           rotation="0 90 0"
           scale="0.25 0.25 0.25"
         ></a-gltf-model>
 
-        <!-- Steve -->
+        <!-- Steve yang bergerak -->
         <a-gltf-model
+          id="steve-npc"
           src="steve_from_a_minecraft_movie.glb"
-          position="5.5 0 -4.5"
+          position="5.5 0.2 -4.5"
           rotation="0 90 0"
           scale="0.40 0.40 0.40"
-        />
-        <!-- Tample-->
+          steve-fsm
+        ></a-gltf-model>
+
+        <!-- Temple -->
         <a-gltf-model
           src="thunderclap_temple.glb"
           position="50 0 80"
@@ -77,16 +77,6 @@
           scale="1.4 1.4 1.4"
           shadow="cast: true; receive: true"
         ></a-gltf-model>
-
-        <!-- Biksu di depan temple -->
-        <a-gltf-model
-          src="black_myth_wukong_-_mi_le_static.glb"
-          position="-1 0 30"
-          rotation="0 180 0"
-          scale="0.05 0.05 0.05"
-          shadow="cast: true; receive: true"
-        ></a-gltf-model>
-        <!-- Decorative Elements -->
 
         <!-- Fence -->
         <a-box
@@ -163,33 +153,33 @@
         ></a-cylinder>
         <a-sphere position="5 3 -15" radius="0.5" color="#FFFF00"></a-sphere>
 
-        <!-- Balcony -->
+        <!-- Balkon Dikecilin + Dijauhin -->
         <a-box
-          position="0 5 -3"
-          width="6"
-          height="0.3"
-          depth="3"
+          position="0 2.5 -6"
+          width="4"
+          height="0.2"
+          depth="2"
           color="#A0522D"
         ></a-box>
         <a-box
-          position="0 3 -3"
-          width="0.3"
-          height="4"
-          depth="0.3"
+          position="0 1 -6"
+          width="0.2"
+          height="2"
+          depth="0.2"
           color="#8B4513"
         ></a-box>
         <a-box
-          position="3 3 -3"
-          width="0.3"
-          height="4"
-          depth="0.3"
+          position="2 1 -6"
+          width="0.2"
+          height="2"
+          depth="0.2"
           color="#8B4513"
         ></a-box>
         <a-box
-          position="-3 3 -3"
-          width="0.3"
-          height="4"
-          depth="0.3"
+          position="-2 1 -6"
+          width="0.2"
+          height="2"
+          depth="0.2"
           color="#8B4513"
         ></a-box>
       </a-entity>
@@ -219,5 +209,35 @@
         color="#FFA500"
       ></a-light>
     </a-scene>
+
+    <!-- AI FSM untuk Steve -->
+    <script>
+      AFRAME.registerComponent("steve-fsm", {
+        schema: {},
+        init: function () {
+          this.state = "WALKING_FORWARD";
+          this.speed = 0.002;
+          this.targetX = 8;
+        },
+        tick: function (time, timeDelta) {
+          let pos = this.el.object3D.position;
+          if (this.state === "WALKING_FORWARD") {
+            if (pos.x < this.targetX) {
+              pos.x += this.speed * timeDelta;
+              this.el.object3D.rotation.y = -Math.PI / 2; // hadap kanan
+            } else {
+              this.state = "WALKING_BACKWARD";
+            }
+          } else if (this.state === "WALKING_BACKWARD") {
+            if (pos.x > 3) {
+              pos.x -= this.speed * timeDelta;
+              this.el.object3D.rotation.y = Math.PI / 2; // hadap kiri
+            } else {
+              this.state = "WALKING_FORWARD";
+            }
+          }
+        },
+      });
+    </script>
   </body>
 </html>
